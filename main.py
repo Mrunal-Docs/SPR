@@ -61,11 +61,11 @@ def main():
 
         osc.enable_channel([1])  # Enable channel 1
         osc.set_horizontal_span(0.4)  # Sets the time of acquisition for 1 milliseconds (10^6 samples) , resolution is hzt_span/10
-        osc.set_vertical_span("CH1", 5)  # Sets the vertical span of the voltage levels, resolution is vertical_span/10
+        osc.set_vertical_span("CH1", 20)  # Sets the vertical span of the voltage levels, resolution is vertical_span/10
 
         #stages (rotation, translation)
         motor1.set_hardware_limit_switches(1,1) #enable forward and reverse motion for rotation stage
-        motor1.set_stage_axis_info(-360,360,2,5.454545) #set min pos, max pos, units to deg, pitch rotation stage
+        motor1.set_stage_axis_info(-500,360,2,5.454545) #set min pos, max pos, units to deg, pitch rotation stage
         motor2.set_hardware_limit_switches(1,1) #enable forward and reverse motion for translation stage
         motor2.set_stage_axis_info(-100,100,1,1.0) #set min pos, max pos, units to deg, pitch translation stage
         motor2.set_velocity_parameters(0.0, 0.5, 1.0)
@@ -85,23 +85,23 @@ def main():
         #     time.sleep(1)
         print('ready to scan from', motor1.position, 'deg')
 
-        motor2.move_to(13.5)  # start taking readings from this position
+        motor2.move_to(17.05)  # start taking readings from this position
         while motor2.is_in_motion:
             time.sleep(1)
         print('ready to scan from', motor2.position, 'mm')
 
         prism_angle = []
         V_output = []
-        angularSteps = 160
-        d_theta = 0.1
+        angularSteps = 100
+        d_theta = 0.02
         for i in range(angularSteps):
 
             theta = motor1.position
             v = []
             p=[]
-            translationSteps = 30
+            translationSteps = 100
             for j in range(translationSteps) : #loop to scan for the max voltage
-                motor2.move_by(0.1)
+                motor2.move_by(0.002)
                 p.append(motor2.position)
                 while motor2.is_in_motion:
                     time.sleep(2)
@@ -130,7 +130,7 @@ def main():
                 time.sleep(1)
 
 
-            motor2.move_to(p[max_index]) #go to the position of max voltage
+            motor2.move_to(p[max_index]-0.05) #go to the position of max voltage minus 0.2 mm
             while motor2.is_in_motion:#wait
                 time.sleep(1)
 
@@ -156,7 +156,7 @@ def main():
 
 
         #homing
-        motor1.move_to(0.6191)
+        #motor1.move_to(0.6191)
         motor2.move_to(50) #move it back to 50 to verify laser position goes into iris
 
         total_time = time.time() - start_time
